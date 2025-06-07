@@ -26,15 +26,16 @@ FROM data_analyst_jobs
 WHERE location='TN' OR location='KY'
 GROUP BY location; 
 
--- Answer: TN: 21, KY:6
+-- Answer: TN: 21, KY:6 Could have used the IN clause (for example; WHERE IN)
 
 -- 4. How many postings in Tennessee have a star rating above 4?
 
 SELECT COUNT(star_rating)
 FROM data_analyst_jobs
-WHERE star_rating > 4;
+WHERE star_rating > 4
+	AND location = 'TN';
 
--- Answer: 416
+-- Answer: 3
 
 -- 5. How many postings in the dataset have a review count between 500 and 1000?
 
@@ -48,9 +49,10 @@ WHERE review_count BETWEEN 500 AND 1000;
 
 SELECT location AS state, AVG(star_rating) AS avg_rating
 FROM data_analyst_jobs
-GROUP BY data_analyst_jobs.location;
+WHERE star_rating IS NOT NULL
+GROUP BY state;
 
--- Answer: NE (4.1999998090000000)
+-- Answer: 46
 
 -- 7. Select unique job titles from the data_analyst_jobs table. How many are there?
 
@@ -76,13 +78,13 @@ SELECT
 FROM
     data_analyst_jobs
 WHERE
-    review_count > 5000 
+    review_count > 5000 AND company IS NOT NULL
 GROUP BY
     company
 ORDER BY
     total_review_count DESC;
 
--- Answer: 41
+-- Answer: 40
 
 
 -- 10. Add the code to order the query in #9 from highest to lowest average star rating. Which company with more than 5000 reviews across all locations in the dataset has the highest star rating? What is that rating?
@@ -100,15 +102,28 @@ GROUP BY
 ORDER BY
     average_star_rating DESC;
 
--- Answer: General Motors  highest average star_rating: 4.1999998090000000
+-- Answer: General Motors, Unilever, Microsoft, Nike, American Express, and Kaiser Permanente highest average star_rating of 4.1999998090000000
 
 -- 11. Find all the job titles that contain the word ‘Analyst’. How many different job titles are there? 
 
-SELECT title
+SELECT DISTINCT(title)
+FROM data_analyst_jobs
+WHERE title ILIKE '%Analyst%';
+
+-- Answer: 774
+
+-- Using Postgres ILIKE (case-insensitive)
+
+SELECT DISTINCT(title)
+FROM data_analyst_jobs
+WHERE title ILIKE '%Analyst%';
+
+-- Answer: 774
+
+
+SELECT COUNT DISTINCT (title)
 FROM  data_analyst_jobs
 WHERE title LIKE 'Analyst%';
-
--- Answer: 12
 
 -- 12. How many different job titles do not contain either the word ‘Analyst’ or the word ‘Analytics’? What word do these positions have in common?
 
@@ -118,7 +133,6 @@ WHERE LOWER(title) NOT LIKE '%analyst%'
   AND LOWER(title) NOT LIKE '%analytics%';
 
 -- Answer: a. There are (4) job titles that do not contain ‘Analyst’ or the word ‘Analytics’. b. I see out of the (4) job titles that Data Visualization Specialist - Consultant appears twice.
-
 
 
 -- Bonus: 
@@ -154,11 +168,11 @@ FROM
     data_analyst_jobs
 WHERE
     days_since_posting > 15  -- Number of days is based on business days
-    AND domain IS NOT NULL
-    AND skill = 'SQL' 
-ORDER BY
+    AND skill ILIKE '%SQL%'
+	AND domain IS NOT NULL
+	ORDER BY
     domain DESC, 
-    days_since_posting DESC; 
+    days_since_posting DESC;
 
--- Answer: a. Transport and Freight, Real Estate, and Internet and Software. b. (3) Sr. Data Analyst, BI Data Analyst, and Data Analyst - Verticals.
+-- Answer: a. Transport and Freight, Telecommunications, and Retail (3) Sr. Data Analyst, SENIOR ANALYST, MARKETING ANALYTICS, and Data Analyst.
 
